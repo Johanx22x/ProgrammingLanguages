@@ -25,7 +25,7 @@ func checkWidth(width int) error {
 //
 // Example:
 //
-//	width = 5
+//  width = 5
 //	Output:
 //	    *
 //	  * * *

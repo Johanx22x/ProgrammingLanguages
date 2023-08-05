@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"reflect"
 	"time"
 )
 
@@ -17,7 +18,12 @@ const (
 // elements must be a pointer to a slice,
 // amount must be positive,
 // direction must be LEFT (0) or RIGHT (1)
-func areParamsValid(amount int, direction int) error {
+func areParamsValid(elements any, amount int, direction int) error {
+	// Check if elements is a slice
+	if elemType := reflect.TypeOf(elements); !(elemType.Kind() == reflect.Ptr && elemType.Elem().Kind() == reflect.Slice) {
+		return fmt.Errorf("elements must be a pointer to a slice")
+	}
+
 	// Check if amount is positive
 	if amount < 0 {
 		return fmt.Errorf("amount must be positive")
@@ -31,41 +37,44 @@ func areParamsValid(amount int, direction int) error {
 	return nil
 }
 
-// rotateSlice rotates the elements of a slice by the given amount
+// rotate rotates the elements of a slice by the given amount
 // in the given direction.
 //
-// elements must be a pointer to a slice of any type.
-// direction must be LEFT (0) or RIGHT (1)
-// amount must be positive
+// elements could be a pointer to a slice of any type.
 //
 // Example:
 //
 //	elements = [1, 2, 3, 4, 5]
-//	direction = LEFT
 //	amount = 2
+//	direction = LEFT
 //	result = [3, 4, 5, 1, 2]
-func rotateSlice[T any](elements *[]T, direction int, amount int) error {
-	// Check if parameters are valid
-	if err := areParamsValid(amount, direction); err != nil {
+func rotateSlice(elements any, amount int, direction int) error {
+	if err := areParamsValid(elements, amount, direction); err != nil {
 		return err
 	}
 
-    // Rotate the elements
+	// Get the value of the elements pointer
+	elementsValue := reflect.ValueOf(elements).Elem()
+
+	// Get the length of the elements
+	length := elementsValue.Len()
+
+	swap := reflect.Swapper(elementsValue.Interface())
 	if direction == LEFT {
-		for i := 0; i < amount; i++ {
-			temp := (*elements)[0]
-			for j := 0; j < len(*elements)-1; j++ {
-				(*elements)[j] = (*elements)[j+1]
+		for j := 0; j < amount; j++ {
+			firstElement := elementsValue.Index(0).Interface()
+			for i := 0; i < length-1; i++ {
+				swap(i, i+1)
 			}
-			(*elements)[len(*elements)-1] = temp
+			elementsValue.Index(length - 1).Set(reflect.ValueOf(firstElement))
 		}
 	} else {
-		for i := 0; i < amount; i++ {
-			temp := (*elements)[len(*elements)-1]
-			for j := len(*elements) - 1; j > 0; j-- {
-				(*elements)[j] = (*elements)[j-1]
+		for j := 0; j < amount; j++ {
+			lastElement := elementsValue.Index(length - 1).Interface()
+			for i := length - 1; i > 0; i-- {
+				swap(i, i-1)
 			}
-			(*elements)[0] = temp
+			elementsValue.Index(0).Set(reflect.ValueOf(lastElement))
 		}
 	}
 
@@ -78,7 +87,7 @@ func main() {
 
 	// Create a slice of 10 integers
 	elements := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	ptrToElements := &elements
+	var ptrToElements any = &elements
 
 	for i := 0; i < 10; i++ {
 		// Rotate the elements by a random amount in a random direction
@@ -87,7 +96,7 @@ func main() {
 
 		fmt.Printf("Slice: %v\n", elements)
 
-		err := rotateSlice(ptrToElements, direction, amount)
+		err := rotateSlice(ptrToElements, amount, direction)
 		if err != nil {
 			panic(err)
 		}
