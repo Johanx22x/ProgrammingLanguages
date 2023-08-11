@@ -50,23 +50,13 @@ func rotateSlice[T any](elements *[]T, direction int, amount int) error {
 		return err
 	}
 
-    // Rotate the elements
+	rotation := amount % len(*elements)
+
+	// Rotate the elements
 	if direction == LEFT {
-		for i := 0; i < amount; i++ {
-			temp := (*elements)[0]
-			for j := 0; j < len(*elements)-1; j++ {
-				(*elements)[j] = (*elements)[j+1]
-			}
-			(*elements)[len(*elements)-1] = temp
-		}
+		*elements = append((*elements)[rotation:], (*elements)[:rotation]...)
 	} else {
-		for i := 0; i < amount; i++ {
-			temp := (*elements)[len(*elements)-1]
-			for j := len(*elements) - 1; j > 0; j-- {
-				(*elements)[j] = (*elements)[j-1]
-			}
-			(*elements)[0] = temp
-		}
+		*elements = append((*elements)[len(*elements)-rotation:], (*elements)[:len(*elements)-rotation]...)
 	}
 
 	return nil
