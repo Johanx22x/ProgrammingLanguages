@@ -5,6 +5,10 @@ let main _ =
     let ruta = solve con_paredes
     printfn "Ruta corta con paredes: %A\n" ruta
 
+    // Sin las paredes de 8|14 y 25|26
+    let ruta = solve con_pocas_paredes
+    printfn "Ruta corta sin las paredes de 8|14 y 25|26: %A\n" ruta
+
     // Using a one-path function
     let ruta = solve_one_path sin_paredes
     printfn "Primer camino sin paredes encontrado: %A" ruta
