@@ -5,3 +5,5 @@ install it first. Can be do it using winget:
 ```powershell
 winget install -e --id GnuWin32.Make
 ```
+
+Also `kotlinc` and `java` is needed to build and run the program.
